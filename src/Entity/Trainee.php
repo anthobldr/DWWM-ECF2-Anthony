@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TraineeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TraineeRepository::class)]
@@ -24,6 +26,17 @@ class Trainee
 
     #[ORM\Column(length: 255)]
     private ?string $phone = null;
+
+    /**
+     * @var Collection<int, Absence>
+     */
+    #[ORM\OneToMany(targetEntity: Absence::class, mappedBy: 'trainee_id')]
+    private Collection $absences;
+
+    public function __construct()
+    {
+        $this->absences = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -74,6 +87,36 @@ class Trainee
     public function setPhone(string $phone): static
     {
         $this->phone = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Absence>
+     */
+    public function getAbsences(): Collection
+    {
+        return $this->absences;
+    }
+
+    public function addAbsence(Absence $absence): static
+    {
+        if (!$this->absences->contains($absence)) {
+            $this->absences->add($absence);
+            $absence->setTraineeId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbsence(Absence $absence): static
+    {
+        if ($this->absences->removeElement($absence)) {
+            // set the owning side to null (unless already changed)
+            if ($absence->getTraineeId() === $this) {
+                $absence->setTraineeId(null);
+            }
+        }
 
         return $this;
     }
