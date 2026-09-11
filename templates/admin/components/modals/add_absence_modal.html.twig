@@ -6,7 +6,6 @@
                     <h5>Saisir une absence</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <form method="POST" action="{{ path('app_absence_new') }}" enctype="multipart/form-data" data-turbo="false">
                     <div class="modal-body">
                         <div class="row">
@@ -19,7 +18,6 @@
                                         <small class="text-secondary">Titre profesionnel<br />Développeur web & web mobile</small>
                                     </div>
                                 </div>
-
                                 <div class="mt-3">
                                     <label for="notes" class="form-label">Notes (optionnel)</label>
                                     <textarea name="notes" id="notes" maxlength="500" placeholder="Ex: Fièvre, consultation médicale..." class="form-control"></textarea>
@@ -27,18 +25,17 @@
                             </div>
                             <div class="col-lg-6">
                                 <input type="hidden" name="trainee_id" value="{{ selectedTrainee.id }}">
-                                
+                            
                                 <div class="mb-3">
                                     <label for="reason" class="form-label">Type d'absence <span class="text-danger">*</span></label>
                                     <select class="form-select" id="reason" name="reason" required>
                                         <option value="">Sélectionner un motif</option>
-                                        <option value="maladie">🤒 Maladie</option>
-                                        <option value="sans_motif">❓ Sans motif</option>
-                                        <option value="legale">📜 Absence légale</option>
-                                        <option value="accident">⚠️ Accident du travail</option>
+                                        <option value="maladie">Maladie</option>
+                                        <option value="sans_motif">Sans motif</option>
+                                        <option value="legale">Absence légale</option>
+                                        <option value="accident">Accident du travail</option>
                                     </select>
                                 </div>
-                                
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <label for="start_date" class="form-label">Date de début <span class="text-danger">*</span></label>
@@ -49,7 +46,6 @@
                                         <input type="date" class="form-control border" id="end_date" name="end_date">
                                     </div>
                                 </div>
-                                
                                 <div class="mt-3">
                                     <label for="justificative" class="form-label">Justificatif PDF (optionnel)</label>
                                     <input type="file" class="form-control border" id="justificative" name="justificative" accept=".pdf">
@@ -59,7 +55,7 @@
                     </div>
                     
                     <div class="modal-footer border-top pt-3">
-                        <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-outline-danger rounded-3" data-bs-dismiss="modal">
                             Annuler
                         </button>
                         <button type="submit" class="btn btn-success rounded-3 px-3">
