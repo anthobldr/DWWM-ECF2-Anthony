@@ -7,7 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TraineeRepository::class)]
 class Trainee
@@ -17,26 +16,25 @@ class Trainee
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le prénom est requis')]
+    #[ORM\Column(length: 100)]
     private ?string $firstName = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le nom est requis')]
+    #[ORM\Column(length: 100)]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\Email(message: 'Email invalide')]
     private ?string $email = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 20, nullable: true)]
     private ?string $phone = null;
 
-    /** Nom du fichier photo stocké dans /public/uploads/photos/ */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoFilename = null;
 
-    #[ORM\OneToMany(targetEntity: Absence::class, mappedBy: 'trainee', cascade: ['remove'])]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateOfBirth = null;
+
+    #[ORM\OneToMany(mappedBy: 'trainee', targetEntity: Absence::class, cascade: ['remove'])]
     private Collection $absences;
 
     public function __construct()
@@ -87,7 +85,7 @@ class Trainee
         return $this->phone;
     }
 
-    public function setPhone(string $phone): static
+    public function setPhone(?string $phone): static
     {
         $this->phone = $phone;
         return $this;
@@ -101,6 +99,17 @@ class Trainee
     public function setPhotoFilename(?string $photoFilename): static
     {
         $this->photoFilename = $photoFilename;
+        return $this;
+    }
+
+    public function getDateOfBirth(): ?\DateTimeInterface
+    {
+        return $this->dateOfBirth;
+    }
+
+    public function setDateOfBirth(?\DateTimeInterface $dateOfBirth): static
+    {
+        $this->dateOfBirth = $dateOfBirth;
         return $this;
     }
 
@@ -128,25 +137,25 @@ class Trainee
         return $this;
     }
 
-    public function getAbsenceCount(): int
+    public function getFullName(): string
     {
-        return $this->absences->count();
+        return $this->firstName . ' ' . $this->lastName;
     }
 
     public function getUnauthorizedAbsenceCount(): int
     {
         return $this->absences->filter(function(Absence $absence) {
-            return $absence->getReason() === 'sans_motif';
+            return $absence->isUnauthorized();
         })->count();
+    }
+
+    public function getAbsenceCount(): int
+    {
+        return $this->absences->count();
     }
 
     public function hasHighUnauthorizedAbsences(): bool
     {
         return $this->getUnauthorizedAbsenceCount() > 5;
-    }
-
-    public function getFullName(): string
-    {
-        return $this->firstName . ' ' . $this->lastName;
     }
 }
