@@ -1,0 +1,111 @@
+{% if editingTrainee %}
+<div class="modal fade show" id="editTraineeModal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div>
+                        <i class="bi bi-pencil-square text-primary fs-5"></i>
+                    </div>
+                    <div class="lh-1">
+                        <h5 class="modal-title mb-0">Modifier le stagiaire</h5>
+                        <small class="text-muted">Mettez à jour les informations du stagiaire.</small>
+                    </div>
+                </div>
+                <a href="?trainee={{ editingTrainee.id }}" class="text-decoration-none text-dark">
+                    <i class="bi bi-x" style="cursor: pointer; font-size: 1.5rem;"></i>
+                </a>
+            </div>
+
+            <form method="POST" action="{{ path('app_trainee_edit', {id: editingTrainee.id}) }}" enctype="multipart/form-data" data-turbo="false">
+                <div class="modal-body">
+                    <div class="row">
+                        {# COLONNE GAUCHE - PHOTO #}
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Photo d'identité <span class="text-danger">*</span></label>
+                                
+                                {# PHOTO ACTUELLE #}
+                                <div class="mb-3 text-center">
+                                    <img src="{% if editingTrainee.photoFilename %}{{ asset('uploads/photos/' ~ editingTrainee.photoFilename) }}{% else %}https://i.pravatar.cc/200?img={{ editingTrainee.id }}{% endif %}" 
+                                         alt="Photo actuelle" class="rounded-3" style="max-height: 250px; max-width: 100%; object-fit: cover;">
+                                    <p class="small text-muted mt-2">Photo actuelle</p>
+                                </div>
+
+                                {# INPUT FILE #}
+                                <input type="file" id="photoFilename" name="photoFilename" accept="image/*" class="form-control rounded-3">
+                                <small class="text-muted d-block mt-2">Formats acceptés : .JPG, .PNG (max. 5 Mo)<br/>Laisser vide pour garder la photo actuelle</small>
+                            </div>
+                        </div>
+
+                        {# COLONNE DROITE - INFOS #}
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <label for="editLastName" class="form-label fw-bold">Nom <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="bi bi-person text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="editLastName" name="lastName" value="{{ editingTrainee.lastName }}" placeholder="Ex. Dupont" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="editFirstName" class="form-label fw-bold">Prénom <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="bi bi-person text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="editFirstName" name="firstName" value="{{ editingTrainee.firstName }}" placeholder="Ex. Jean" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editDateOfBirth" class="form-label fw-bold">Date de naissance <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="bi bi-calendar text-muted"></i>
+                                    </span>
+                                    <input type="date" class="form-control border-start-0" id="editDateOfBirth" name="dateOfBirth" value="{% if editingTrainee.dateOfBirth %}{{ editingTrainee.dateOfBirth|date('Y-m-d') }}{% endif %}" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# TÉLÉPHONE ET EMAIL #}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editPhone" class="form-label fw-bold">Téléphone <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-telephone text-muted"></i>
+                                </span>
+                                <input type="tel" class="form-control border-start-0" id="editPhone" name="phone" value="{{ editingTrainee.phone }}" placeholder="Ex. 06 12 34 56 78" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="editEmail" class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-envelope text-muted"></i>
+                                </span>
+                                <input type="email" class="form-control border-start-0" id="editEmail" name="email" value="{{ editingTrainee.email }}" placeholder="Ex. jean.dupont@example.fr" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top pt-3">
+                    <a href="?trainee={{ editingTrainee.id }}" class="btn btn-outline-secondary rounded-3">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">
+                        <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}

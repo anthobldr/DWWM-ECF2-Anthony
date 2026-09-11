@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AFPA</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+     {{ importmap('app') }}
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-dark sticky-top border-bottom">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center gap-3 ms-3">
+                    <img src="/images/logo.jpeg" width="40%"/>
+                    <span class="lh-1">La formation <br />pour avancer</span>
+                </div>
+                <div class="d-flex gap-2 align-items-center me-5">
+                    <img src="/icons/user.svg" width="50px"/>
+                    <div class="d-flex flex-column">
+                        <span class="fw-bold me-3">{{ app.user.username }}</span>
+                        <small class="lh-1">Administrateur</small>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="row" style="min-height: 90vh;">
+            <div class="col-lg-2 bg-secondary rounded-end-1">
+                <ul class="d-flex flex-column list-unstyled py-lg-3">
+                    <li class="text-white bg-success py-lg-3 rounded-end-3 ps-lg-3">
+                        <i class="bi bi-house-fill me-2"></i> Accueil
+                    </li>
+                    <li class="text-white py-lg-3 rounded-end-3 ps-lg-3">
+                        <i class="bi bi-people-fill me-lg-2"></i>Stagiaires
+                    </li>
+                    <li class="text-white py-lg-3 rounded-end-3 ps-lg-3">
+                        <i class="bi bi-calendar2-week me-lg-2"></i> Absences
+                    </li>
+                    <li class="text-white py-lg-3 rounded-end-3 ps-lg-3">
+                        <i class="bi bi-reception-3 me-lg-2"></i> Rapports
+                    </li>
+                    <li class="text-white py-lg-3 rounded-end-3 ps-lg-3">
+                        <i class="bi bi-gear me-lg-2"></i>Paramètres
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6 pt-lg-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="lh-1">
+                        <h1>Mur d'accueil</h1>
+                        <span>Mosaïque trombinoscope des stagiaires</span>
+                    </div>
+                    <button class="btn bg-success text-white rounded-3" data-bs-toggle="modal" data-bs-target="#addTraineeModal">
+                        <i class="bi bi-plus me-2"></i>Ajouter un stagiaire
+                    </button>
+                </div>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-lg-3" style="height: 90vh; overflow-y: auto;">
+                    {% for trainee in trainees %}
+                        <div class="col">
+                            <div class="card h-100 rounded-3 border-0 shadow-sm {% if selectedTrainee and selectedTrainee.id == trainee.id %}border border-success border-2{% endif %}" style="position: relative;">
+                                <div class="position-absolute top-0 end-0 m-2" style="z-index: 1000;">
+                                    <button class="btn btn-sm btn-light rounded-circle" type="button" id="dropdownBtn{{ trainee.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownBtn{{ trainee.id }}">
+                                        <li>
+                                            <a class="dropdown-item" href="?trainee={{ trainee.id }}&edit_trainee={{ trainee.id }}">
+                                                <i class="bi bi-pencil-square me-2"></i>Modifier
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="POST" action="{{ path('app_trainee_delete', {id: trainee.id}) }}" data-turbo="false">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ trainee.id) }}">
+                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Confirmer la suppression ?');" style="border: none; background: none; padding: 0.5rem 1rem; text-align: left; width: 100%; cursor: pointer;">
+                                                    <i class="bi bi-trash3 me-2"></i>Supprimer
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <a href="?trainee={{ trainee.id }}" class="text-decoration-none d-block" style="cursor: pointer;">
+                                    <img src="{% if trainee.photoFilename %}{{ asset('uploads/photos/' ~ trainee.photoFilename) }}{% else %}https://i.pravatar.cc/200?img={{ trainee.id }}{% endif %}" 
+                                        class="card-img-top" alt="{{ trainee.firstName }}" height="150px">
+                                    
+                                    <div class="card-body lh-sm">
+                                        <h6 class="card-title {% if trainee.unauthorizedAbsenceCount > 5 %}text-danger fw-bold{% endif %}">
+                                            {{ trainee.lastName }} {{ trainee.firstName }}
+                                        </h6>
+                                        <p class="card-text small text-muted">Titre profesionnel <br /> Développeur web & web mobile</p>
+                                        
+                                        {% if traineeStatus[trainee.id].isAbsent %}
+                                            <span class="badge bg-danger text-danger bg-opacity-25 p-2">
+                                                <i class="bi bi-exclamation-circle-fill me-1"></i>Absent
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success text-success bg-opacity-25 p-2">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Présent
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% if selectedTrainee %}
+                <div class="col-lg-4 pt-lg-5">
+                    <div class="shadow-sm p-3 rounded-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Détail du stagiaire</h4>
+                            <a href="?trainee=" class="text-decoration-none text-dark">
+                                <i class="bi bi-x me-lg-3" style="cursor: pointer; font-size: 1.5rem;"></i>
+                            </a>
+                        </div>
+                        <div class="d-flex gap-3 mb-4">
+                            <img src="{% if selectedTrainee.photoFilename %}{{ asset('uploads/photos/' ~ selectedTrainee.photoFilename) }}{% else %}https://i.pravatar.cc/200?img={{ selectedTrainee.id }}{% endif %}" width="150px" class="rounded-3">
+                            <div class="d-flex flex-column">
+                                <small class="text-danger mb-2">
+                                    <i class="text-danger bi bi-exclamation-triangle-fill me-1"></i> 
+                                    {% if selectedTrainee.unauthorizedAbsenceCount > 5 %}Alerte{% else %}Normal{% endif %}
+                                </small>
+                                <h5>{{ selectedTrainee.firstName }} {{ selectedTrainee.lastName }}</h5>
+                                <small>Titre profesionnel<br/>Développeur web & web mobile</small>
+                                <ul class="list-unstyled mt-2">
+                                    <li><small><i class="bi bi-telephone me-2"></i> {{ selectedTrainee.phone }}</small></li>
+                                    <li><small><i class="bi bi-envelope me-2"></i>{{ selectedTrainee.email }}</small></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <ul class="d-flex gap-4 list-unstyled mb-4 border-bottom">
+                            <li class="pb-2 border-bottom border-success border-2">
+                                <a href="?trainee={{ selectedTrainee.id }}#absences" class="text-decoration-none text-success">
+                                    <small>Absences</small>
+                                </a>
+                            </li>
+                        </ul>
+                        <div id="absences" class="d-flex flex-column my-4">
+                            <h6>Historique des absences</h6>
+                            {% if selectedTraineeAbsences|length > 0 %}
+                                <div class="d-flex flex-column gap-3 mt-2">
+                                    {% for absence in selectedTraineeAbsences %}
+                                    <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                        <div class="d-flex flex-column">
+                                            <small>{{ absence.date|date('d/m/Y') }}</small>
+                                            <small class="text-secondary">1 jour</small>
+                                        </div>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <div>
+                                                {% if absence.reason == 'sans_motif' %}
+                                                    <span class="badge bg-danger bg-opacity-25 text-danger">
+                                                        <i class="bi bi-plus me-1"></i>Non justifiée
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-success bg-opacity-25 text-success">
+                                                        <i class="bi bi-check-circle-fill me-1"></i>Justifiée ({{ absence.reason|replace({'_': ' '}) }})
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="d-flex">
+                                                {% if absence.justificativeFilename %}
+                                                    <a href="{{ asset('uploads/justificatives/' ~ absence.justificativeFilename) }}" class="btn btn-sm" target="_blank" title="Ouvrir le justificatif">
+                                                        <i class="bi bi-eye text-primary"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <button class="btn btn-sm border-0" disabled title="Aucun justificatif">
+                                                        <i class="bi bi-eye text-muted"></i>
+                                                    </button>
+                                                {% endif %}
+                                                <a href="?trainee={{ selectedTrainee.id }}&edit_absence={{ absence.id }}" class="btn btn-sm">
+                                                    <i class="bi bi-pencil-square text-warning"></i>
+                                                </a>
+                                                <form method="POST" action="{{ path('app_absence_delete', {id: absence.id}) }}" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm" onclick="return confirm('Confirmer la suppression ?')">
+                                                        <i class="bi bi-trash3 text-danger"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted mt-2">Aucune absence enregistrée</p>
+                            {% endif %}
+
+                            <button class="btn bg-success text-white rounded-3 my-4" data-bs-toggle="modal" data-bs-target="#addAbsenceModal">
+                                <i class="bi bi-plus me-2"></i>Saisir une absence
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+    {{ include('admin/components/modals/add_trainee_modal.html.twig') }}
+    {{ include('admin/components/modals/edit_trainee_modal.html.twig') }}
+    {{ include('admin/components/modals/add_absence_modal.html.twig') }}
+    {{ include('admin/components/modals/edit_absence_modal.html.twig') }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

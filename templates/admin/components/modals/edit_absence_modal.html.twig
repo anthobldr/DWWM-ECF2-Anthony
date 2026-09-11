@@ -1,0 +1,75 @@
+{% if editingAbsence and selectedTrainee %}
+    <div class="modal fade show" id="editAbsenceModal" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5>Modifier une absence</h5>
+                    <a href="?trainee={{ selectedTrainee.id }}" class="text-decoration-none text-dark">
+                        <i class="bi bi-x" style="cursor: pointer; font-size: 1.5rem;"></i>
+                    </a>
+                </div>
+
+                <form method="POST" action="{{ path('app_absence_edit', {id: editingAbsence.id}) }}" enctype="multipart/form-data" data-turbo="false">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <img src="{% if selectedTrainee.photoFilename %}{{ asset('uploads/photos/' ~ selectedTrainee.photoFilename) }}{% else %}https://i.pravatar.cc/200?img={{ selectedTrainee.id }}{% endif %}" 
+                                        width="100px" class="rounded-4">
+                                    <div class="d-flex flex-column">
+                                        <h6>{{ selectedTrainee.firstName }} {{ selectedTrainee.lastName }}</h6>
+                                        <small class="text-secondary">Titre profesionnel<br />Développeur web & web mobile</small>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <label for="editNotes" class="form-label">Notes (optionnel)</label>
+                                    <textarea name="notes" id="editNotes" maxlength="500" class="form-control">{{ editingAbsence.notes }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="editReason" class="form-label">Type d'absence <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="editReason" name="reason" required>
+                                        <option value="maladie" {% if editingAbsence.reason == 'maladie' %}selected{% endif %}>🤒 Maladie</option>
+                                        <option value="sans_motif" {% if editingAbsence.reason == 'sans_motif' %}selected{% endif %}>❓ Sans motif</option>
+                                        <option value="legale" {% if editingAbsence.reason == 'legale' %}selected{% endif %}>📜 Absence légale</option>
+                                        <option value="accident" {% if editingAbsence.reason == 'accident' %}selected{% endif %}>⚠️ Accident du travail</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <label for="editStartDate" class="form-label">Date de début <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control border" id="editStartDate" name="start_date" value="{{ editingAbsence.date|date('Y-m-d') }}" required>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label for="editEndDate" class="form-label">Date de fin</label>
+                                        <input type="date" class="form-control border" id="editEndDate" name="end_date">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <label for="editJustificative" class="form-label">Justificatif PDF (optionnel)</label>
+                                    <input type="file" class="form-control border" id="editJustificative" name="justificative" accept=".pdf">
+                                    {% if editingAbsence.justificativeFilename %}
+                                        <small class="text-muted">Fichier actuel: <strong>{{ editingAbsence.justificativeFilename }}</strong></small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer border-top pt-3">
+                        <a href="?trainee={{ selectedTrainee.id }}" class="btn btn-outline-secondary rounded-3">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-3 px-3">
+                            Modifier l'absence
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
