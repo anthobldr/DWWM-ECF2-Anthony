@@ -83,12 +83,12 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <a href="?trainee={{ trainee.id }}" class="text-decoration-none d-block" style="cursor: pointer;">
+                                <a href="?trainee={{ trainee.id }}" class="text-decoration-none text-black d-block">
                                     <img src="{% if trainee.photoFilename %}{{ asset('uploads/photos/' ~ trainee.photoFilename) }}{% else %}https://i.pravatar.cc/200?img={{ trainee.id }}{% endif %}" 
                                         class="card-img-top" alt="{{ trainee.firstName }}" height="150px">
                                     
                                     <div class="card-body lh-sm">
-                                        <h6 class="card-title {% if trainee.unauthorizedAbsenceCount > 5 %}text-danger fw-bold{% endif %}">
+                                        <h6 class="{% if trainee.unauthorizedAbsenceCount > 5 %}text-danger fw-bold{% endif %}">
                                             {{ trainee.lastName }} {{ trainee.firstName }}
                                         </h6>
                                         <p class="card-text small text-muted">Titre profesionnel <br /> Développeur web & web mobile</p>
@@ -143,7 +143,7 @@
                         <div id="absences" class="d-flex flex-column my-4">
                             <h6>Historique des absences</h6>
                             {% if selectedTraineeAbsences|length > 0 %}
-                                <div class="d-flex flex-column gap-3 mt-2">
+                                <div class="d-flex flex-column gap-3 mt-2" style="max-height: 300px; overflow-y: auto;">
                                     {% for absence in selectedTraineeAbsences %}
                                     <div class="d-flex justify-content-between align-items-center p-2 border rounded">
                                         <div class="d-flex flex-column">
