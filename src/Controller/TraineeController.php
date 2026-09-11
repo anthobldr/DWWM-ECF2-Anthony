@@ -65,51 +65,50 @@ final class TraineeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_trainee_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_trainee_edit', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(Request $request, Trainee $trainee, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
-    {
-        $form = $this->createForm(TraineeType::class, $trainee);
-        $form->handleRequest($request);
+    public function edit(Trainee $trainee, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response {
+        // Récupérer les données du formulaire
+        $trainee->setLastName($request->request->get('lastName'));
+        $trainee->setFirstName($request->request->get('firstName'));
+        $trainee->setPhone($request->request->get('phone'));
+        $trainee->setEmail($request->request->get('email'));
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $photoFile = $form->get('photoFilename')->getData();
-            
-            if ($photoFile) {
-                // Supprimer l'ancienne photo si elle existe
-                if ($trainee->getPhotoFilename()) {
-                    $oldPhoto = $this->getParameter('photos_directory') . '/' . $trainee->getPhotoFilename();
-                    if (file_exists($oldPhoto)) {
-                        unlink($oldPhoto);
-                    }
-                }
-
-                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
-
-                try {
-                    $photoFile->move(
-                        $this->getParameter('photos_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de la photo');
-                }
-
-                $trainee->setPhotoFilename($newFilename);
-            }
-
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Stagiaire modifié avec succès');
-            return $this->redirectToRoute('app_admin_dashboard', [], Response::HTTP_SEE_OTHER);
+        // Date de naissance
+        if ($request->request->get('dateOfBirth')) {
+            $trainee->setDateOfBirth(new \DateTime($request->request->get('dateOfBirth')));
         }
 
-        return $this->render('trainee/edit.html.twig', [
-            'trainee' => $trainee,
-            'form' => $form,
-        ]);
+        // Upload nouvelle photo
+        $photoFile = $request->files->get('photoFilename');
+        if ($photoFile) {
+            // Supprimer l'ancienne photo
+            if ($trainee->getPhotoFilename()) {
+                $oldFile = $this->getParameter('photos_directory') . '/' . $trainee->getPhotoFilename();
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
+            }
+
+            $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+
+            try {
+                $photoFile->move(
+                    $this->getParameter('photos_directory'),
+                    $newFilename
+                );
+                $trainee->setPhotoFilename($newFilename);
+            } catch (FileException $e) {
+                $this->addFlash('error', 'Erreur lors de l\'upload');
+            }
+        }
+
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Stagiaire modifié avec succès');
+        return $this->redirectToRoute('app_admin_dashboard', ['trainee' => $trainee->getId()]);
     }
 
     #[Route('/{id}', name: 'app_trainee_delete', methods: ['POST'])]
