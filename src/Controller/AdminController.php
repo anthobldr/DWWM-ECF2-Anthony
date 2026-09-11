@@ -17,7 +17,14 @@ final class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function dashboard(TraineeRepository $traineeRepo, AbsenceRepository $absenceRepo, Request $request): Response
     {
+        // Charger les trainees
         $trainees = $traineeRepo->findAll();
+        
+        foreach($trainees as $trainee){
+            $trainee->getAbsences()->count();
+        }
+        
+        // Statut présent/absent aujourd'hui
         $today = new \DateTime();
         $traineeStatus = [];
         foreach($trainees as $trainee){
@@ -32,11 +39,11 @@ final class AdminController extends AbstractController
                 'absence' => $absence
             ];
         }
+        
+        // Stagiaire sélectionné
         $selectedTraineeId = $request->query->get('trainee');
         $selectedTrainee = null;
         $selectedTraineeAbsences = [];
-        $editingAbsenceId = $request->query->get('edit_absence');
-        $editingAbsence = null;
         
         if($selectedTraineeId){
             $selectedTrainee = $traineeRepo->find($selectedTraineeId);
@@ -45,12 +52,16 @@ final class AdminController extends AbstractController
             }
         }
 
+        // Trainees en édition
         $editingTraineeId = $request->query->get('edit_trainee');
         $editingTrainee = null;
         if($editingTraineeId){
             $editingTrainee = $traineeRepo->find($editingTraineeId);
         }
 
+        // Absence en édition
+        $editingAbsenceId = $request->query->get('edit_absence');
+        $editingAbsence = null;
         if($editingAbsenceId){
             $editingAbsence = $absenceRepo->find($editingAbsenceId);
         }
