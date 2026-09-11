@@ -11,13 +11,18 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-dark sticky-top border-bottom">
+        <nav class="navbar navbar-dark bg-white sticky-top border-bottom">
             <div class="container-fluid">
-                <div class="d-flex align-items-center gap-3 ms-3">
-                    <img src="/images/logo.jpeg" width="40%"/>
-                    <span class="lh-1">La formation <br />pour avancer</span>
-                </div>
+                <a href="/" class="text-decoration-none text-black">
+                    <div class="d-flex align-items-center gap-3 ms-3">
+                        <img src="/images/logo.jpeg" width="40%"/>
+                        <span class="lh-1">La formation <br />pour avancer</span>
+                    </div>
+                </a>
                 <div class="d-flex gap-2 align-items-center me-5">
+                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="offcanvas" data-bs-target="#statsOffcanvas" aria-controls="statsOffcanvas">
+                        <i class="bi bi-bar-chart-fill me-2"></i>Statistiques
+                    </button>  
                     <img src="/icons/user.svg" width="50px"/>
                     <div class="d-flex flex-column">
                         <span class="fw-bold me-3">{{ app.user.username }}</span>
@@ -197,6 +202,90 @@
                     </div>
                 </div>
             {% endif %}
+        </div>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="statsOffcanvas" aria-labelledby="statsOffcanvasLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="statsOffcanvasLabel">
+                    <i class="bi bi-bar-chart-fill text-success me-2"></i>Statistiques Détaillées
+                </h5>
+                <button type="button" class="btn-close btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <hr>
+            <div class="offcanvas-body p-0">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-3 fw-bold">Résumé Général</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Nombre de stagiaires:</span>
+                        <strong>{{ trainees|length }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total absences:</span>
+                        <strong class="text-danger">{{ totalAbsences }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Coût par jour:</span>
+                        <strong class="text-success">33,90€</strong>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top">
+                        <span class="fw-bold">Perte totale estimée:</span>
+                        <strong class="text-danger fs-5">{{ (estimatedLoss)|number_format(2, ',', ' ') }}€</strong>
+                    </div>
+                </div>
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-3 fw-bold">
+                        <i class="bi bi-trophy-fill text-warning me-2"></i>Classement par Absences
+                    </h6>
+                    <div class="list-group list-group-flush">
+                        {% for ranking, stats in traineesRanking %}
+                            <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary rounded-circle" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                                        {{ loop.index }}
+                                    </span>
+                                    <div>
+                                        <span class="{% if stats.unauthorizedAbsenceCount > 5 %}text-danger fw-bold{% endif %}">
+                                            {{ stats.lastName }} {{ stats.firstName }}
+                                        </span>
+                                        {% if stats.unauthorizedAbsenceCount > 5 %}
+                                            <i class="bi bi-exclamation-circle-fill text-danger ms-1"></i>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">{{ stats.unauthorizedAbsenceCount }} sans motif</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-danger">{{ stats.absenceCount }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-3 fw-bold">
+                        <i class="bi bi-cash-coin text-danger me-2"></i>Perte de Revenu
+                    </h6>
+                    <div class="list-group list-group-flush">
+                        {% for stats in traineesWithLoss %}
+                            <div class="list-group-item px-0 py-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="{% if stats.unauthorizedAbsenceCount > 5 %}text-danger fw-bold{% endif %}">
+                                        {{ stats.lastName }} {{ stats.firstName }}
+                                    </span>
+                                    <strong class="text-danger">{{ (stats.loss)|number_format(2, ',', ' ') }}€</strong>
+                                </div>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-danger" 
+                                        role="progressbar" 
+                                        style="width: {{ (stats.loss / estimatedLoss * 100)|round }}%"
+                                        aria-valuenow="{{ (stats.loss / estimatedLoss * 100)|round }}"
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <small class="text-muted d-block mt-1">{{ stats.absenceCount }} absences</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
     {{ include('admin/components/modals/add_trainee_modal.html.twig') }}
